@@ -4,7 +4,7 @@ import { auth } from "@/app/auth";
 import prisma from "@/app/lib/prismaClient";
 import PaymentIndex from "@/components/dashboard/payment/PaymentIndex";
 import React from "react";
-export const revalidate = 60;
+export const revalidate = 300;
 
 const page = async () => {
   const session = await auth();

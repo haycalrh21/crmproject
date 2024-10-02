@@ -8,7 +8,7 @@ import { getClients } from "@/app/action/client";
 import { getProjects } from "@/app/action/project";
 import prisma from "@/app/lib/prismaClient";
 
-export const revalidate = 60; // Revalidate every 60 seconds, or use cache 'no-store' for no cache
+export const revalidate = 300; // Revalidate every 60 seconds, or use cache 'no-store' for no cache
 
 interface Employee {
   id: string;

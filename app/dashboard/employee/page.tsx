@@ -5,7 +5,7 @@ import prisma from "@/app/lib/prismaClient";
 import EmployeeIndex from "@/components/dashboard/employee/EmployeeIndex";
 
 import { Role } from "@prisma/client";
-export const revalidate = 60;
+export const revalidate = 300;
 
 const EmployePages = async () => {
   const session = await auth();

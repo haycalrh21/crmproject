@@ -5,7 +5,7 @@ import React from "react";
 import { Task } from "@/app/types/tasks";
 import { Employee } from "@/app/types/tasks";
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 const TaskPage = async () => {
   const session = await auth();
