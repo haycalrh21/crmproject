@@ -1,0 +1,108 @@
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  OWNER
+  PROJECT_MANAGER
+  EMPLOYEE
+}
+
+model User {
+  id        String     @id @default(uuid()) @db.Char(36)
+  name      String
+  email     String     @unique
+  phone     String
+  companyId String?    // Pastikan ini ada dan nullable jika perlu
+  createdAt DateTime   @default(now())
+
+  projects  Project[]
+  company   Company?   @relation(fields: [companyId], references: [id])
+}
+
+
+model Employee {
+  id        String     @id @default(uuid()) @db.Char(36)
+  name      String
+  role      Role?     // Menggunakan enum untuk role
+  email     String     @unique
+  phone     String?
+  password  String
+  companyId String?
+  createdAt DateTime   @default(now())
+
+  projects  Project[]  // Tidak ada onDelete: CASCADE
+  tasks     Task[]     // Tidak ada onDelete: CASCADE
+  company   Company?   @relation(fields: [companyId], references: [id] ) 
+}
+
+enum ProjectStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Project {
+  id          String      @id @default(uuid()) @db.Char(36)
+  name        String
+  description String
+  userId      String
+  employeeId  String
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime    @default(now())
+  status      ProjectStatus? 
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade) // Tidak ada onDelete: CASCADE
+  employee    Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade) 
+  payments    Payment[]   
+  tasks       Task[]      
+}
+
+
+model Payment {
+  id          String    @id @default(uuid()) @db.Char(36)
+  projectId   String
+  amount      String
+  status      String
+  dueDate     DateTime
+  companyId   String
+  createdAt   DateTime   @default(now())
+
+
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade) 
+  company     Company?   @relation(fields: [companyId], references: [id])
+}
+
+model Task {
+  id          String    @id @default(uuid()) @db.Char(36)
+  projectId   String
+  employeeId  String
+  description String
+  status      String
+  dueDate     DateTime
+  createdAt   DateTime   @default(now())
+
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade) // Tidak ada onDelete: CASCADE
+  employee    Employee  @relation(fields: [employeeId], references: [id]) // Tidak ada onDelete: CASCADE
+}
+
+model Company {
+  id        String     @id @default(uuid()) @db.Char(36)
+  name      String
+  address   String
+  phone     String
+  logo      String
+  createdAt DateTime    @default(now())
+
+  employees Employee[] 
+   payments  Payment[]
+   users     User[]
+
+}
