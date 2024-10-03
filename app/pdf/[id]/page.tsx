@@ -15,7 +15,6 @@ const PdfPage = async ({ params }: { params: { id: string } }) => {
     return (
       <div className="max-w-2xl mx-auto p-5 bg-white border rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
-        <p>Unable to fetch invoice data. Please try again later.</p>
       </div>
     );
   }

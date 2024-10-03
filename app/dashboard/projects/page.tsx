@@ -3,7 +3,7 @@ import React from "react";
 export const revalidate = 300;
 const page = () => {
   return (
-    <div className="">
+    <div suppressHydrationWarning={true}>
       <ProjectIndex />
     </div>
   );

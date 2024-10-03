@@ -23,12 +23,7 @@ const ProjectIndex = async () => {
     id: userLogin?.companyId as string,
   });
 
-  console.log(getData);
-  if (!getData) {
-    throw new Error("Company not found.");
-  }
-
-  const getEmployeeData = await getEmployee(getData.id);
+  const getEmployeeData = await getEmployee(getData?.id as string);
   const getClientData = await getClients();
 
   // Ambil data proyek berdasarkan companyId dan pagination
@@ -54,7 +49,7 @@ const ProjectIndex = async () => {
   }));
 
   return (
-    <div className="p-4">
+    <div className="p-4" suppressHydrationWarning={true}>
       <CardProject
         session={session}
         client={getClientData}

@@ -55,7 +55,10 @@ const CardProject = ({
   };
 
   return (
-    <div className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-4 items-center justify-center">
+    <div
+      className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-4 items-center justify-center"
+      suppressHydrationWarning={true}
+    >
       <DialogComponent
         session={session}
         client={client}
@@ -63,10 +66,10 @@ const CardProject = ({
         setProjects={setProjects}
         resetForm={() => {}}
       />
-      <div className="col-span-1 lg:col-span-4">
+      <div className="col-span-1 lg:col-span-4" suppressHydrationWarning={true}>
         <div className="overflow-hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {projects.length === 0 ? (
-            <div className="text-center p-4">
+            <div className="text-center p-4" suppressHydrationWarning={true}>
               Tidak ada proyek yang tersedia.
             </div>
           ) : (
@@ -81,7 +84,10 @@ const CardProject = ({
             ))
           )}
         </div>
-        <div className="flex justify-center mt-4">
+        <div
+          className="flex justify-center mt-4"
+          suppressHydrationWarning={true}
+        >
           <Button
             onClick={async () => {
               if (currentPage > 1) {

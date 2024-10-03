@@ -130,7 +130,7 @@ export const DialogComponent = ({
   );
 
   return (
-    <div className="col-span-1 mb-4">
+    <div className="col-span-1 mb-4" suppressHydrationWarning={true}>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           {session?.user?.role === "OWNER" ? (

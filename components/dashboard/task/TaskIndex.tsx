@@ -11,7 +11,7 @@ import {
 import { Task } from "@/app/types/tasks"; // Adjust the path accordingly
 import { Button } from "@/components/ui/button";
 import { updateTask } from "@/app/action/task";
-import { Skeleton } from "@/components/ui/skeleton"; // Tambahkan komponen Skeleton
+import { Skeleton } from "@/components/ui/skeleton"; // Skeleton for loading state
 import { useToast } from "@/hooks/use-toast";
 
 // Function to group tasks by project name
@@ -38,11 +38,12 @@ const TaskIndex = ({
 
   const groupedTasks = groupTasksByProject(tasks);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (groupedTasks) {
-      setLoading(false); // Only set loading to false when payment data exists
+      setLoading(false); // Only set loading to false when task data exists
     } else {
-      setLoading(true); // Keep loading if payment is null or undefined
+      setLoading(true); // Keep loading if task data is null or undefined
     }
   }, [groupedTasks]);
 
@@ -63,23 +64,19 @@ const TaskIndex = ({
   return (
     <div className="flex flex-col mt-4 p-4">
       {loading ? (
-        // Tampilan loading menggunakan Skeleton
+        // Display Skeleton while loading
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Card key={index} className="flex flex-col">
-              <CardHeader suppressHydrationWarning>
-                <Skeleton className="w-[150px] h-[20px] rounded" />
-                <Skeleton className="w-[100px] h-[20px] mt-2 rounded" />
-                <CardDescription>
-                  <Skeleton className="w-[100px] h-[20px] mt-2 rounded" />
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <Skeleton className="w-full h-[100px] rounded" />
-              </CardContent>
-              <CardFooter>
-                <Skeleton className="w-[100px] h-[20px] rounded" />
-              </CardFooter>
+            <Card
+              key={index}
+              className="flex flex-col space-y-4"
+              suppressHydrationWarning={true}
+            >
+              <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              <Skeleton className="w-[150px] h-[20px] rounded-full" />
+              <Skeleton className="w-[120px] h-[20px] rounded-full" />
+              <Skeleton className="w-[130px] h-[20px] rounded-full" />
+              <Skeleton className="w-[140px] h-[20px] rounded-full" />
             </Card>
           ))}
         </div>
@@ -109,9 +106,9 @@ const TaskIndex = ({
                     {task.description}
                   </CardContent>
                   <CardFooter>
-                    <p suppressHydrationWarning>
+                    <div suppressHydrationWarning>
                       Due Date: {new Date(task.dueDate).toLocaleDateString()}
-                    </p>
+                    </div>
                   </CardFooter>
                   <div>
                     {session.user.role === "EMPLOYEE" &&
@@ -137,7 +134,7 @@ const TaskIndex = ({
         ))
       ) : (
         <div>
-          <p>No tasks available.</p>
+          <span>No tasks available.</span> {/* Use <span> instead of <p> */}
         </div>
       )}
     </div>

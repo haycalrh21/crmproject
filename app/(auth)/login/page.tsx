@@ -2,6 +2,7 @@
 import Spinner from "@/components/ui/Spinner";
 import { useToast } from "@/hooks/use-toast";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -92,9 +93,9 @@ const Loginpage = () => {
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <a href="/register" className="text-black font-semibold">
+          <Link href="/register" className="text-black font-semibold">
             Register
-          </a>
+          </Link>
         </p>
       </div>
     </div>

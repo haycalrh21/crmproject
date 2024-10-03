@@ -144,9 +144,9 @@ const CompanyIndex = ({
         </div>
       ) : (
         <div className="text-left">
-          <p className="text-lg text-gray-700 mb-4">
+          <div className="text-lg text-gray-700 mb-4">
             No company data available.
-          </p>
+          </div>
           <Dialog>
             <DialogTrigger asChild>
               <Button

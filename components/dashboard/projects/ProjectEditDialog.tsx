@@ -95,7 +95,7 @@ const ProjectEditDialog = ({
   };
 
   return (
-    <div>
+    <div suppressHydrationWarning={true}>
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="edit" className="flex-1 text-xs">
@@ -104,8 +104,10 @@ const ProjectEditDialog = ({
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Status</DialogTitle>
-            <DialogDescription>
+            <DialogTitle suppressHydrationWarning={true}>
+              Edit Status
+            </DialogTitle>
+            <DialogDescription suppressHydrationWarning={true}>
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="Select Status" className="text-right">
@@ -125,7 +127,7 @@ const ProjectEditDialog = ({
                   </Select>
                 </div>
                 {loading ? (
-                  <Button type="submit">
+                  <Button type="submit" suppressHydrationWarning={true}>
                     <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
                   </Button>
                 ) : (
