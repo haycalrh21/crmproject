@@ -19,28 +19,21 @@ const ProjectIndex = async () => {
 
   // Cari employee berdasarkan user yang sedang login
   const userLogin = await loginEmployee(session?.user?.id as string);
-
-  // Validasi userLogin dan companyId
-  if (!userLogin || !userLogin.companyId) {
-    throw new Error("User not found.");
-  }
-
-  // Ambil data perusahaan berdasarkan companyId dari employee yang login
   const getData = await getCompany({
-    id: userLogin.companyId as string, // Kirim objek dengan id
+    id: userLogin?.companyId as string,
   });
 
-  // Pastikan getData ada sebelum melanjutkan
+  console.log(getData);
   if (!getData) {
     throw new Error("Company not found.");
   }
 
-  const getEmployeeData = await getEmployee(getData.id); // Ambil karyawan berdasarkan id perusahaan
+  const getEmployeeData = await getEmployee(getData.id);
   const getClientData = await getClients();
 
   // Ambil data proyek berdasarkan companyId dan pagination
   const { projects, totalPages, currentPage } = await getProjects(
-    userLogin.companyId,
+    userLogin?.companyId as string,
     1,
     8
   );

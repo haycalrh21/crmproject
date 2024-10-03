@@ -32,14 +32,13 @@ export const ProjectCard = ({
   onStatusUpdate: (updatedProject: Project) => void;
 }) => {
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    // Simulasi jeda loading dengan setTimeout
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000); // Jeda 2 detik
 
-    // Cleanup timer saat komponen unmount
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    if (project) {
+      setLoading(false); // Only set loading to false when payment data exists
+    } else {
+      setLoading(true); // Keep loading if payment is null or undefined
+    }
   }, [project]);
   const formatDate = (date: Date | null) => {
     if (!date) return ""; // Handle null dates

@@ -38,14 +38,12 @@ const TaskIndex = ({
 
   const groupedTasks = groupTasksByProject(tasks);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    // Simulasi jeda loading dengan setTimeout
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000); // Jeda 2 detik
-
-    return () => clearTimeout(timer);
+    if (groupedTasks) {
+      setLoading(false); // Only set loading to false when payment data exists
+    } else {
+      setLoading(true); // Keep loading if payment is null or undefined
+    }
   }, [groupedTasks]);
 
   const assignTask = async (id: string) => {
@@ -138,7 +136,9 @@ const TaskIndex = ({
           </div>
         ))
       ) : (
-        <p>No tasks available.</p>
+        <div>
+          <p>No tasks available.</p>
+        </div>
       )}
     </div>
   );

@@ -28,20 +28,19 @@ const ClientDialog = ({
   const [isOpen, setIsOpen] = useState(false); // State to manage dialog open/close
 
   const handleDialogClose = () => setIsOpen(false); // Function to close the dialog
-
+  console.table(session.role);
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {session?.user?.role === "OWNER" ||
-          (session?.user?.role === "PROJECT_MANAGER" && (
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => setIsOpen(true)}
-            >
-              Tambahkan Client
-            </Button>
-          ))}
+        {(session?.role === "OWNER" || session?.role === "PROJECT_MANAGER") && (
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => setIsOpen(true)}
+          >
+            Tambahkan Client
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

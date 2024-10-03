@@ -48,15 +48,12 @@ const EmployeeTable = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Simulasi jeda loading dengan setTimeout
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000); // Jeda 2 detik
-
-    // Cleanup timer saat komponen unmount
-    return () => clearTimeout(timer);
+    if (fetchData) {
+      setLoading(false); // Only set loading to false when payment data exists
+    } else {
+      setLoading(true); // Keep loading if payment is null or undefined
+    }
   }, [fetchData]);
-
   const handleEdit = (employee: Employee) => {
     setSelectedEmployee(employee);
     setIsEditDialogOpen(true);

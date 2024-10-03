@@ -28,13 +28,11 @@ const ClientTable = ({
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    // Simulasi jeda loading dengan setTimeout
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000); // Jeda 2 detik
-
-    // Cleanup timer saat komponen unmount
-    return () => clearTimeout(timer);
+    if (clients) {
+      setLoading(false); // Only set loading to false when payment data exists
+    } else {
+      setLoading(true); // Keep loading if payment is null or undefined
+    }
   }, [clients]);
   const openDialog = (id: string) => {
     setSelectedClientId(id); // Set the selected client ID

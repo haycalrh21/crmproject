@@ -94,16 +94,16 @@ const PaymentIndex = ({
 
   return (
     <div>
-      <div>
+      <div suppressHydrationWarning>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          {session?.user?.role === "OWNER" ||
-            (session?.user?.role === "PROJECT_MANAGER" && (
-              <DialogTrigger>
-                <Button variant="outline" className="mt-4">
-                  Tambah Payment
-                </Button>
-              </DialogTrigger>
-            ))}
+          {(session?.role === "OWNER" ||
+            session?.role === "PROJECT_MANAGER") && (
+            <DialogTrigger>
+              <Button variant="outline" className="mt-4">
+                Tambah Payment
+              </Button>
+            </DialogTrigger>
+          )}
           <PaymentForm
             project={project}
             loading={loading}
