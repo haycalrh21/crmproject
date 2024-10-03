@@ -10,7 +10,7 @@ const DashboardPage = async () => {
     <div className="p-4 flex flex-col justify-between">
       <div className="flex flex-col items-center">
         <p className="mt-4 text-lg">Dashboard</p>
-        <p className="mt-2 text-md">Current Time: {currentTime}</p>
+        {/* <p className="mt-2 text-md">Current Time: {currentTime}</p> */}
         <CardIndex />
       </div>
     </div>

@@ -10,7 +10,6 @@ export const revalidate = 300;
 const TaskPage = async () => {
   const session = await auth();
 
-  // Fetch the employee with their tasks based on session user ID
   const userLogin: Employee | null = await prisma.employee.findUnique({
     where: {
       id: session?.user?.id as string,

@@ -13,6 +13,8 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import Spinner from "@/components/ui/Spinner";
+import { useToast } from "@/hooks/use-toast";
 
 const EmployeeForm = ({
   session,
@@ -36,23 +38,41 @@ const EmployeeForm = ({
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    setLoading(true);
+    if (!name || !email || !password || !selectedRole || !phone) {
+      toast({
+        title: "Error",
+        description: "Harus diisi semua",
+      });
+      return;
+    }
     if (session?.user?.role !== Role.OWNER) {
-      alert("Anda bukan Owner");
+      toast({
+        title: "Error",
+        description: "Anda bukan Owner",
+      });
+
       return;
     }
 
     if (!companyId) {
-      alert("Company ID tidak valid.");
+      toast({
+        title: "Error",
+        description: "Company ID cannot be null",
+      });
       return;
     }
 
     if (!selectedRole) {
-      alert("Pilih role terlebih dahulu.");
-      return;
+      toast({
+        title: "Error",
+        description: "Role cannot be null",
+      });
     }
 
     try {
@@ -64,15 +84,19 @@ const EmployeeForm = ({
         companyId,
         selectedRole as Role
       );
-
-      // Panggil handler untuk menutup dialog
+      setLoading(false);
+      toast({
+        title: "Success",
+        description: "Employee added successfully",
+      });
       onSubmitSuccess();
 
-      // Panggil handler untuk penambahan karyawan baru
       onEmployeeAdded(newEmployee);
     } catch (error) {
-      console.error("Error adding employee:", error);
-      alert("Gagal menambahkan karyawan. Silakan coba lagi.");
+      toast({
+        title: "Error",
+        description: "Register failed",
+      });
     }
   };
 
@@ -99,6 +123,7 @@ const EmployeeForm = ({
           <Input
             id="email"
             name="email"
+            type="email"
             className="col-span-3"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -152,7 +177,13 @@ const EmployeeForm = ({
           </Select>
         </div>
       </div>
-      <Button type="submit">Save changes</Button>
+      {loading ? (
+        <Button type="submit">
+          <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+        </Button>
+      ) : (
+        <Button type="submit">Submit</Button>
+      )}
     </form>
   );
 };

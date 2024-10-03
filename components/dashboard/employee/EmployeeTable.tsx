@@ -15,9 +15,10 @@ import {
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import { Role } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EmployeEdit from "./EmployeEdit";
 import EmployeDelete from "./EmployeDelete";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Employee {
   id: string;
@@ -42,8 +43,19 @@ const EmployeeTable = ({
   const [selectedEmployeeDelete, setSelectedEmployeeDelete] =
     useState<Employee | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  useEffect(() => {
+    // Simulasi jeda loading dengan setTimeout
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); // Jeda 2 detik
+
+    // Cleanup timer saat komponen unmount
+    return () => clearTimeout(timer);
+  }, [fetchData]);
 
   const handleEdit = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -57,48 +69,96 @@ const EmployeeTable = ({
 
   return (
     <div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {fetchData?.map((data) => (
-            <TableRow key={data.id}>
-              <TableCell>{data.name}</TableCell>
-              <TableCell>{data.email}</TableCell>
-              <TableCell>{data.role}</TableCell>
-              <TableCell>{data.phone}</TableCell>
+      {loading ? (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+              <TableHead className="text-right">
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger>. . .</DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleEdit(data)}>
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDelete(data)}>
-                      Hapus
-                    </DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Hapus</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
             </TableRow>
-          )) || (
+          </TableBody>
+        </Table>
+      ) : (
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={6} className="text-center">
-                No employees found.
-              </TableCell>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {fetchData?.map((data) => (
+              <TableRow key={data.id}>
+                <TableCell>{data.name}</TableCell>
+                <TableCell>{data.email}</TableCell>
+                <TableCell>{data.role}</TableCell>
+                <TableCell>{data.phone}</TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>. . .</DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handleEdit(data)}>
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDelete(data)}>
+                        Hapus
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            )) || (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center">
+                  No employees found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      )}
 
-      {/* Render EmployeEdit modal only when an employee is selected */}
       {selectedEmployee && (
         <EmployeEdit
           employee={selectedEmployee}

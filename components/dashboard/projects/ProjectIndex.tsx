@@ -2,11 +2,10 @@ import React from "react";
 import CardProject from "./CardProject";
 import { auth } from "@/app/auth";
 import { getCompany } from "@/app/action/company";
-import { getEmployee } from "@/app/action/employee";
+import { getEmployee, loginEmployee } from "@/app/action/employee";
 import { ProjectStatus } from "@prisma/client"; // Pastikan import ProjectStatus benar
 import { getClients } from "@/app/action/client";
 import { getProjects } from "@/app/action/project";
-import prisma from "@/app/lib/prismaClient";
 
 export const revalidate = 300; // Revalidate every 60 seconds, or use cache 'no-store' for no cache
 
@@ -19,11 +18,7 @@ const ProjectIndex = async () => {
   const session = await auth();
 
   // Cari employee berdasarkan user yang sedang login
-  const userLogin = (await prisma.employee.findUnique({
-    where: {
-      id: session?.user?.id as string,
-    },
-  })) as Employee;
+  const userLogin = await loginEmployee(session?.user?.id as string);
 
   // Validasi userLogin dan companyId
   if (!userLogin || !userLogin.companyId) {

@@ -20,6 +20,8 @@ import {
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar"; // Pastikan Calendar diimpor
 import { assignTask } from "@/app/action/task";
+import { useToast } from "@/hooks/use-toast";
+import Spinner from "@/components/ui/Spinner";
 
 const TaskDialog = ({
   session,
@@ -37,30 +39,49 @@ const TaskDialog = ({
   const [description, setDescription] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState<Date | undefined>(new Date());
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!projectId || !selectEmployee || !description || !selectedStatus) {
-      console.error(
-        "Project ID, Employee, Description, or Status cannot be null"
+    try {
+      e.preventDefault();
+      setLoading(true);
+      if (!projectId || !selectEmployee || !description || !selectedStatus) {
+        toast({
+          title: "Error",
+          description: "Harus diisi semua",
+        });
+        return;
+      }
+      if (
+        session?.user?.role !== "PROJECT_MANAGER" &&
+        session?.user?.role !== "OWNER"
+      ) {
+        toast({
+          title: "Error",
+          description: "Anda bukan Owner/Project Manager",
+        });
+        return;
+      }
+      const response = await assignTask(
+        projectId,
+        selectEmployee,
+        description,
+        selectedStatus,
+        dueDate as Date
       );
-      return;
+      setLoading(false);
+      toast({
+        title: "Success",
+        description: "Task assigned successfully",
+      });
+    } catch (error) {
+      setLoading(false);
+      toast({
+        title: "Error",
+        description: "Failed to assign task",
+      });
     }
-    if (
-      session?.user?.role !== "PROJECT_MANAGER" &&
-      session?.user?.role !== "OWNER"
-    ) {
-      alert("Anda bukan Karyawan");
-      return;
-    }
-    const response = await assignTask(
-      projectId,
-      selectEmployee,
-      description,
-      selectedStatus,
-      dueDate as Date
-    );
   };
   const filteredEmployees = employee.filter((emp) => emp.role === "EMPLOYEE");
 
@@ -156,9 +177,13 @@ const TaskDialog = ({
                   />
                 </div>
               </div>
-              <Button type="submit" className="mt-4">
-                Save changes
-              </Button>
+              {loading ? (
+                <Button type="submit">
+                  <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+                </Button>
+              ) : (
+                <Button type="submit">Submit</Button>
+              )}
             </form>
           </DialogDescription>
         </DialogHeader>

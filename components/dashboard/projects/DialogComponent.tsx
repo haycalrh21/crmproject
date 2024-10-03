@@ -22,6 +22,8 @@ import { Label } from "@/components/ui/label";
 import { createProject } from "@/app/action/project";
 import { Project } from "@/app/types/project";
 import { ProjectStatus } from "@prisma/client";
+import { useToast } from "@/hooks/use-toast";
+import Spinner from "@/components/ui/Spinner";
 
 export const DialogComponent = ({
   session,
@@ -46,11 +48,17 @@ export const DialogComponent = ({
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
     if (!selectedClientId || !selectedEmployeeId || !selectedStatus) {
-      console.error("Client ID, Employee ID, or Status cannot be null");
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+      });
       return;
     }
     try {
@@ -81,7 +89,11 @@ export const DialogComponent = ({
           startDate: startDate ? new Date(startDate) : new Date(),
           endDate: endDate ? new Date(endDate) : null,
         };
-
+        setLoading(false);
+        toast({
+          title: "Success",
+          description: "Project created successfully",
+        });
         setProjects((prevProjects: Project[]) => {
           const isDuplicate = prevProjects.some(
             (proj) => proj.id === newProject.id
@@ -98,10 +110,19 @@ export const DialogComponent = ({
         resetForm();
         setDialogOpen(false);
       } else {
-        console.error("Failed to create project");
+        setLoading(false);
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+        });
       }
     } catch (error) {
-      console.error("Error creating project:", error);
+      setLoading(false);
+
+      toast({
+        title: "Error",
+        description: "Failed to create project. Please try again.",
+      });
     }
   };
   const filteredEmployees = employee.filter(
@@ -254,7 +275,13 @@ export const DialogComponent = ({
               </div>
             </div>
             <div className="flex justify-end pt-6">
-              <Button type="submit">Simpan</Button>
+              {loading ? (
+                <Button type="submit">
+                  <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+                </Button>
+              ) : (
+                <Button type="submit">Submit</Button>
+              )}
             </div>
           </form>
         </DialogContent>

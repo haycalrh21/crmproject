@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/app/action/client";
+import Spinner from "@/components/ui/Spinner";
+import { useToast } from "@/hooks/use-toast";
 
 const ClientForm = ({
   session,
@@ -23,21 +25,38 @@ const ClientForm = ({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
   const companyId = session.companyId;
+  const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (session?.role !== "OWNER" && session?.role !== "PROJECT_MANAGER") {
-      alert("Anda bukan Owner");
-      return;
-    }
+    try {
+      event.preventDefault();
+      setLoading(true);
+      if (session?.role !== "OWNER" && session?.role !== "PROJECT_MANAGER") {
+        toast({
+          title: "Error",
+          description: "You are not authorized to create client",
+        });
+      }
 
-    const newClient = await createClient(name, email, phone, companyId);
-    onClientAdded(newClient);
-    setName("");
-    setEmail("");
-    setPhone("");
-    onClose(); // Close the dialog after submitting
+      const newClient = await createClient(name, email, phone, companyId);
+      setLoading(false);
+      toast({
+        title: "Success",
+        description: "Client created successfully",
+      });
+      onClientAdded(newClient);
+      setName("");
+      setEmail("");
+      setPhone("");
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    }
   };
 
   return (
@@ -62,6 +81,7 @@ const ClientForm = ({
           </Label>
           <Input
             id="email"
+            type="email"
             name="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -83,7 +103,13 @@ const ClientForm = ({
           />
         </div>
       </div>
-      <Button type="submit">Save changes</Button>
+      {loading ? (
+        <Button type="submit">
+          <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+        </Button>
+      ) : (
+        <Button type="submit">Submit</Button>
+      )}
     </form>
   );
 };

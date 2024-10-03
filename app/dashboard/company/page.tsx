@@ -1,16 +1,13 @@
 import { getCompany } from "@/app/action/company";
+import { loginEmployee } from "@/app/action/employee";
 import { auth } from "@/app/auth";
-import prisma from "@/app/lib/prismaClient";
 import CompanyIndex from "@/components/dashboard/company/CompanyIndex";
-export const revalidate = 300;
 
+export const revalidate = 300;
 const CompanyPage = async () => {
   const session = await auth();
-  const userLogin = await prisma.employee.findUnique({
-    where: {
-      id: session?.user?.id as string,
-    },
-  });
+  const userLogin = await loginEmployee(session?.user?.id as string);
+
   const getData = await getCompany({
     id: userLogin?.companyId as string,
   });

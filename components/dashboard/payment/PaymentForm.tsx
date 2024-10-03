@@ -16,15 +16,18 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import React, { useState } from "react";
+import Spinner from "@/components/ui/Spinner";
 
 const PaymentForm = ({
   project,
+  loading,
   handleSubmit,
   setSelectedProjectId,
   setAmount,
   setSelectedStatus,
   setDueDate, // Tetap meneruskan setDueDate ke parent untuk digunakan di PaymentIndex
 }: {
+  loading: boolean;
   project: { id: string; name: string; user: { name: string } }[];
   handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   setSelectedProjectId: (value: string | null) => void;
@@ -33,7 +36,6 @@ const PaymentForm = ({
   setDueDate: (date: Date | undefined) => void; // Passed from parent
 }) => {
   const [dueDate, setLocalDueDate] = useState<Date | undefined>(new Date());
-
   const handleDateChange = (date: Date | undefined) => {
     setLocalDueDate(date); // Update local state for selected date
     setDueDate(date); // Update the parent component's state
@@ -86,7 +88,6 @@ const PaymentForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Belum bayar">Belum bayar</SelectItem>
-                    <SelectItem value="Sudah bayar">Sudah bayar</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -102,9 +103,13 @@ const PaymentForm = ({
                 />
               </div>
             </div>
-            <Button type="submit" className="mt-4">
-              Save changes
-            </Button>
+            {loading ? (
+              <Button type="submit">
+                <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+              </Button>
+            ) : (
+              <Button type="submit">Submit</Button>
+            )}
           </form>
         </DialogDescription>
       </DialogHeader>

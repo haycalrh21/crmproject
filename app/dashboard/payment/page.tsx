@@ -1,7 +1,8 @@
+import { loginEmployee } from "@/app/action/employee";
 import { getPayments } from "@/app/action/payment";
 import { getProjectPayment } from "@/app/action/project";
 import { auth } from "@/app/auth";
-import prisma from "@/app/lib/prismaClient";
+
 import PaymentIndex from "@/components/dashboard/payment/PaymentIndex";
 import React from "react";
 export const revalidate = 300;
@@ -9,11 +10,7 @@ export const revalidate = 300;
 const page = async () => {
   const session = await auth();
 
-  const userLogin = await prisma.employee.findUnique({
-    where: {
-      id: session?.user?.id as string,
-    },
-  });
+  const userLogin = await loginEmployee(session?.user?.id as string);
 
   const getProjectPayments = await getProjectPayment();
 

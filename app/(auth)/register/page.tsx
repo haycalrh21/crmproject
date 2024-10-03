@@ -1,10 +1,14 @@
 "use client";
 import { createEmployee } from "@/app/action/employee";
+import Spinner from "@/components/ui/Spinner";
+import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 
 const RegisterPage = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -14,10 +18,19 @@ const RegisterPage = () => {
     const password = formData.get("password") as string;
 
     try {
+      setLoading(true);
       const employee = await createEmployee(name, email, password);
+      setLoading(false);
+      toast({
+        title: "Success",
+        description: "Register successfully",
+      });
       router.push("/login");
     } catch (error) {
-      console.error("Error creating employee:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
     }
   };
 
@@ -71,12 +84,17 @@ const RegisterPage = () => {
               className="mt-1 w-full border  rounded-md p-2 focus:border-black focus:outline-none"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-black text-white py-2 rounded-md font-semibold hover:bg-gray-900"
-          >
-            Register
-          </button>
+
+          {loading ? (
+            <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+          ) : (
+            <button
+              type="submit"
+              className="w-full bg-black text-white py-2 rounded-md font-semibold hover:bg-gray-900"
+            >
+              Register
+            </button>
+          )}
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
           Already have an account?{" "}

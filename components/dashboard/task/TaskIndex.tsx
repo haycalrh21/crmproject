@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,6 +11,8 @@ import {
 import { Task } from "@/app/types/tasks"; // Adjust the path accordingly
 import { Button } from "@/components/ui/button";
 import { updateTask } from "@/app/action/task";
+import { Skeleton } from "@/components/ui/skeleton"; // Tambahkan komponen Skeleton
+import { useToast } from "@/hooks/use-toast";
 
 // Function to group tasks by project name
 const groupTasksByProject = (tasks: Task[]) => {
@@ -31,27 +33,59 @@ const TaskIndex = ({
   initialTasks: Task[];
   session: any;
 }) => {
-  // State to manage tasks
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const { toast } = useToast();
 
-  // Group tasks by project name
   const groupedTasks = groupTasksByProject(tasks);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulasi jeda loading dengan setTimeout
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); // Jeda 2 detik
+
+    return () => clearTimeout(timer);
+  }, [groupedTasks]);
 
   const assignTask = async (id: string) => {
-    // Update the status locally first
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
         task.id === id ? { ...task, status: "Sudah Selesai" } : task
       )
     );
 
-    // Call the API to update the task
     await updateTask(id, "Sudah Selesai");
+    toast({
+      title: "Success",
+      description: "Task assigned successfully",
+    });
   };
 
   return (
     <div className="flex flex-col mt-4 p-4">
-      {tasks.length > 0 ? (
+      {loading ? (
+        // Tampilan loading menggunakan Skeleton
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Card key={index} className="flex flex-col">
+              <CardHeader suppressHydrationWarning>
+                <Skeleton className="w-[150px] h-[20px] rounded" />
+                <Skeleton className="w-[100px] h-[20px] mt-2 rounded" />
+                <CardDescription>
+                  <Skeleton className="w-[100px] h-[20px] mt-2 rounded" />
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <Skeleton className="w-full h-[100px] rounded" />
+              </CardContent>
+              <CardFooter>
+                <Skeleton className="w-[100px] h-[20px] rounded" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : tasks.length > 0 ? (
         Object.entries(groupedTasks).map(([projectName, projectTasks]) => (
           <div key={projectName} className="mb-4">
             <h2 className="text-lg font-semibold">{projectName}</h2>

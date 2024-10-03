@@ -1,3 +1,4 @@
+"use client";
 import {
   Table,
   TableBody,
@@ -13,7 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ClientDelete from "./ClientDelete";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ClientTable = ({
   clients,
@@ -24,7 +26,16 @@ const ClientTable = ({
 }) => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    // Simulasi jeda loading dengan setTimeout
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); // Jeda 2 detik
 
+    // Cleanup timer saat komponen unmount
+    return () => clearTimeout(timer);
+  }, [clients]);
   const openDialog = (id: string) => {
     setSelectedClientId(id); // Set the selected client ID
     setOpenModal(true);
@@ -37,35 +48,77 @@ const ClientTable = ({
 
   return (
     <div className="overflow-auto max-h-200">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {clients.map((client) => (
-            <TableRow key={client.id}>
-              <TableCell>{client.name}</TableCell>
-              <TableCell>{client.email}</TableCell>
-              <TableCell>{client.phone}</TableCell>
+      {loading ? (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+              <TableHead>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+              <TableHead className="text-right">
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="w-[100px] h-[20px] rounded-full" />
+              </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
-                  <DropdownMenuTrigger>. . . </DropdownMenuTrigger>
+                  <DropdownMenuTrigger> </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => openDialog(client.id)}>
-                      Hapus
-                    </DropdownMenuItem>
+                    <DropdownMenuItem>Hapus</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {clients.map((client) => (
+              <TableRow key={client.id}>
+                <TableCell>{client.name}</TableCell>
+                <TableCell>{client.email}</TableCell>
+                <TableCell>{client.phone}</TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>. . . </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => openDialog(client.id)}>
+                        Hapus
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
       {selectedClientId && (
         <ClientDelete
           id={selectedClientId}

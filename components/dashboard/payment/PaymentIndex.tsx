@@ -4,6 +4,9 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { createPayment, getPayments } from "@/app/action/payment"; // ambil getPayments buat refresh data
 import PaymentForm from "./PaymentForm";
 import PaymentTable from "./PaymentTable";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { set } from "date-fns";
 
 const PaymentIndex = ({
   session,
@@ -41,6 +44,8 @@ const PaymentIndex = ({
   const [amount, setAmount] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState<Date | undefined>(new Date()); // State for dueDate
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const companyId = session.companyId;
 
@@ -54,8 +59,13 @@ const PaymentIndex = ({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    setLoading(true);
     if (session?.role !== "OWNER") {
-      alert("Anda bukan Owner");
+      toast({
+        title: "Error",
+        description: "You are not authorized to create payment",
+      });
       return;
     }
     await createPayment(
@@ -65,6 +75,12 @@ const PaymentIndex = ({
       dueDate ?? new Date(),
       companyId
     );
+
+    setLoading(false);
+    toast({
+      title: "Success",
+      description: "Payment created successfully",
+    });
     // Reset form
     setSelectedProjectId(null);
     setAmount("");
@@ -80,9 +96,17 @@ const PaymentIndex = ({
     <div>
       <div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger>Tambah Payment</DialogTrigger>
+          {session?.user?.role === "OWNER" ||
+            (session?.user?.role === "PROJECT_MANAGER" && (
+              <DialogTrigger>
+                <Button variant="outline" className="mt-4">
+                  Tambah Payment
+                </Button>
+              </DialogTrigger>
+            ))}
           <PaymentForm
             project={project}
+            loading={loading}
             handleSubmit={handleSubmit}
             setSelectedProjectId={setSelectedProjectId}
             setAmount={setAmount}

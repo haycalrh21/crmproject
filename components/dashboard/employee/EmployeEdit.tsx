@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { Role } from "@prisma/client";
 import { updateEmployee } from "@/app/action/employee";
+import { useToast } from "@/hooks/use-toast";
+import Spinner from "@/components/ui/Spinner";
 
 const EmployeEdit = ({
   employee,
@@ -41,21 +43,38 @@ const EmployeEdit = ({
   const [email, setEmail] = useState(employee?.email || "");
   const [selectRole, setSelectRole] = useState<Role | null>(
     employee?.role || null
-  ); // Set initial value as Role or null
+  );
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await updateEmployee(
+        employee.id,
+        name,
+        email,
+        phone,
+        selectRole ?? Role.EMPLOYEE
+      );
 
-    const response = await updateEmployee(
-      employee.id,
-      name,
-      email,
-      phone,
-      selectRole ?? Role.EMPLOYEE
-    );
-    onEmployeeUpdated(response);
+      setLoading(false);
+      toast({
+        title: "Success",
+        description: "Employee updated successfully",
+      });
+      onEmployeeUpdated(response);
 
-    onClose(); // Close dialog after saving
+      onClose(); // Close dialog after saving
+    } catch (error) {
+      setLoading(false);
+
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    }
   };
 
   return (
@@ -128,7 +147,13 @@ const EmployeEdit = ({
                   </Select>
                 </div>
               </div>
-              <Button type="submit">Save changes</Button>
+              {loading ? (
+                <Button type="submit">
+                  <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+                </Button>
+              ) : (
+                <Button type="submit">Submit</Button>
+              )}
             </form>
           </DialogDescription>
         </DialogHeader>

@@ -20,6 +20,8 @@ import {
 import { ProjectStatus } from "@prisma/client";
 import { useState } from "react";
 import { Project } from "@/app/types/project";
+import { useToast } from "@/hooks/use-toast";
+import Spinner from "@/components/ui/Spinner";
 
 const ProjectEditDialog = ({
   project,
@@ -31,6 +33,9 @@ const ProjectEditDialog = ({
   onStatusUpdate: (updatedProject: Project) => void;
 }) => {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
   const statusproject = [
     {
       id: 1,
@@ -42,29 +47,50 @@ const ProjectEditDialog = ({
     },
   ];
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedStatus) {
-      console.error("Status cannot be null");
-      return;
-    }
-    if (
-      session?.user?.role !== "PROJECT_MANAGER" &&
-      session?.user?.role !== "OWNER"
-    ) {
-      alert("Anda bukan Karyawan");
-      return;
-    }
+    try {
+      e.preventDefault();
+      setLoading(true);
+      if (!selectedStatus) {
+        toast({
+          title: "Error",
+          description: "Please select a status",
+        });
+        return;
+      }
+      if (
+        session?.user?.role !== "PROJECT_MANAGER" &&
+        session?.user?.role !== "OWNER"
+      ) {
+        toast({
+          title: "Error",
+          description: "Anda bukan Owner/Project Manager",
+        });
+        return;
+      }
 
-    const isProjectComplete = await projectComplete(project.id);
-    console.log(isProjectComplete);
-    if (!isProjectComplete) {
-      alert("Project belum kelar, silahkan selesaikan tugas terlebih dahulu");
-      return;
-    } else {
-      await updateProjectStatus(project.id, selectedStatus as ProjectStatus);
+      const isProjectComplete = await projectComplete(project.id);
 
-      // Call the onStatusUpdate callback with the updated project
-      onStatusUpdate({ ...project, status: selectedStatus as ProjectStatus });
+      if (!isProjectComplete) {
+        toast({
+          title: "Error",
+          description: "Project must be completed before updating status",
+        });
+        return;
+      } else {
+        await updateProjectStatus(project.id, selectedStatus as ProjectStatus);
+        setLoading(false);
+        toast({
+          title: "Success",
+          description: "Status updated successfully",
+        });
+        onStatusUpdate({ ...project, status: selectedStatus as ProjectStatus });
+      }
+    } catch (error) {
+      setLoading(false);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
     }
   };
 
@@ -98,9 +124,13 @@ const ProjectEditDialog = ({
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline" type="submit">
-                  Submit
-                </Button>
+                {loading ? (
+                  <Button type="submit">
+                    <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+                  </Button>
+                ) : (
+                  <Button type="submit">Submit</Button>
+                )}
               </form>
             </DialogDescription>
           </DialogHeader>

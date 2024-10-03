@@ -69,19 +69,16 @@ const EmployeeIndex = ({
     <div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          {session?.user?.role !== Role.OWNER ? (
-            <Button variant="outline" disabled className="mt-4">
-              Lihat Karyawan
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => setIsDialogOpen(true)}
-            >
-              Tambahkan Karyawan
-            </Button>
-          )}
+          {session?.user?.role === Role.OWNER ||
+            (session?.user?.role === Role.PROJECT_MANAGER && (
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => setIsDialogOpen(true)}
+              >
+                Tambahkan Karyawan
+              </Button>
+            ))}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

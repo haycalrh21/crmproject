@@ -55,87 +55,78 @@ const Sidebar = ({
         <CircleX onClick={onClose} className="cursor-pointer block md:hidden" />
       </div>
       <ul className="space-y-2">
-        <Link href="/dashboard">
-          <li
-            className={`flex items-center p-2 rounded justify-start gap-4 ${
-              pathname === "/dashboard" ? "bg-gray-600" : "hover:bg-gray-700"
-            }`}
-          >
-            <LayoutDashboard />
-            Home
-          </li>
+        <Link
+          href="/dashboard"
+          className={`flex items-center p-2 rounded justify-start gap-4 ${
+            pathname === "/dashboard" ? "bg-gray-600" : "hover:bg-gray-700"
+          }`}
+        >
+          <LayoutDashboard />
+          Home
         </Link>
-        <Link href="/dashboard/company">
-          <li
-            className={`flex items-center p-2 rounded justify-start gap-4 ${
-              pathname === "/dashboard/company"
-                ? "bg-gray-600"
-                : "hover:bg-gray-700"
-            }`}
-          >
-            <Building2 />
-            Company
-          </li>
+        <Link
+          href="/dashboard/company"
+          className={`flex items-center p-2 rounded justify-start gap-4 ${
+            pathname === "/dashboard/company"
+              ? "bg-gray-600"
+              : "hover:bg-gray-700"
+          }`}
+        >
+          <Building2 />
+          Company
         </Link>
-        <Link href="/dashboard/employee">
-          <li
-            className={`flex items-center p-2 rounded justify-start gap-4 ${
-              pathname === "/dashboard/employee"
-                ? "bg-gray-600"
-                : "hover:bg-gray-700"
-            }`}
-          >
-            <Users />
-            Employee
-          </li>
+        <Link
+          href="/dashboard/employee"
+          className={`flex items-center p-2 rounded justify-start gap-4 ${
+            pathname === "/dashboard/employee"
+              ? "bg-gray-600"
+              : "hover:bg-gray-700"
+          }`}
+        >
+          <Users />
+          Employee
         </Link>
-        <Link href="/dashboard/client">
-          <li
-            className={`flex items-center p-2 rounded justify-start gap-4 ${
-              pathname === "/dashboard/client"
-                ? "bg-gray-600"
-                : "hover:bg-gray-700"
-            }`}
-          >
-            <Contact />
-            Client
-          </li>
+        <Link
+          href="/dashboard/client"
+          className={`flex items-center p-2 rounded justify-start gap-4 ${
+            pathname === "/dashboard/client"
+              ? "bg-gray-600"
+              : "hover:bg-gray-700"
+          }`}
+        >
+          <Contact />
+          Client
         </Link>
-        <Link href="/dashboard/projects">
-          <li
-            className={`flex items-center p-2 rounded justify-start gap-4 ${
-              pathname === "/dashboard/projects"
-                ? "bg-gray-600"
-                : "hover:bg-gray-700"
-            }`}
-          >
-            <FolderOpenDot />
-            Projects
-          </li>
+        <Link
+          href="/dashboard/projects"
+          className={`flex items-center p-2 rounded justify-start gap-4 ${
+            pathname === "/dashboard/projects"
+              ? "bg-gray-600"
+              : "hover:bg-gray-700"
+          }`}
+        >
+          <FolderOpenDot />
+          Projects
         </Link>
-        <Link href="/dashboard/task">
-          <li
-            className={`flex items-center p-2 rounded justify-start gap-4 ${
-              pathname === "/dashboard/task"
-                ? "bg-gray-600"
-                : "hover:bg-gray-700"
-            }`}
-          >
-            <FolderCheckIcon />
-            Task
-          </li>
+        <Link
+          href="/dashboard/task"
+          className={`flex items-center p-2 rounded justify-start gap-4 ${
+            pathname === "/dashboard/task" ? "bg-gray-600" : "hover:bg-gray-700"
+          }`}
+        >
+          <FolderCheckIcon />
+          Task
         </Link>
-        <Link href="/dashboard/payment">
-          <li
-            className={`flex items-center p-2 rounded justify-start gap-4 ${
-              pathname === "/dashboard/payment"
-                ? "bg-gray-600"
-                : "hover:bg-gray-700"
-            }`}
-          >
-            <DollarSign />
-            Payment
-          </li>
+        <Link
+          href="/dashboard/payment"
+          className={`flex items-center p-2 rounded justify-start gap-4 ${
+            pathname === "/dashboard/payment"
+              ? "bg-gray-600"
+              : "hover:bg-gray-700"
+          }`}
+        >
+          <DollarSign />
+          Payment
         </Link>
         <li
           className="hover:bg-gray-700 flex items-center p-2 rounded justify-start gap-4 cursor-pointer"

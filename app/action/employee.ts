@@ -102,3 +102,12 @@ export const deleteEmployee = async (id: string) => {
   });
   return employee;
 };
+
+export const loginEmployee = async (id: string) => {
+  const employee = await prisma.employee.findUnique({
+    where: {
+      id: id,
+    },
+  });
+  return employee;
+};

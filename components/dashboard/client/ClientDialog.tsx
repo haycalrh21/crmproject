@@ -32,13 +32,16 @@ const ClientDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="mt-4"
-          onClick={() => setIsOpen(true)}
-        >
-          Tambahkan Client
-        </Button>
+        {session?.user?.role === "OWNER" ||
+          (session?.user?.role === "PROJECT_MANAGER" && (
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => setIsOpen(true)}
+            >
+              Tambahkan Client
+            </Button>
+          ))}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

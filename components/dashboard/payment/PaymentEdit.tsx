@@ -15,15 +15,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Spinner from "@/components/ui/Spinner";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 const PaymentEdit = ({ data, onClose }: { data: any; onClose: () => void }) => {
   const [selectStatus, setSelectStatus] = useState<string | null>(null);
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const response = await updatePayment(data.id, selectStatus as string);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-    console.log(response);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+      setLoading(true);
+      const response = await updatePayment(data.id, selectStatus as string);
+      setLoading(false);
+      toast({
+        title: "Success",
+        description: "Payment updated successfully",
+      });
+    } catch (error) {
+      setLoading(false);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    }
   };
   return (
     <Dialog open onOpenChange={onClose}>
@@ -51,9 +68,13 @@ const PaymentEdit = ({ data, onClose }: { data: any; onClose: () => void }) => {
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" variant="edit">
-              Submit
-            </Button>
+            {loading ? (
+              <Button type="submit">
+                <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+              </Button>
+            ) : (
+              <Button type="submit">Submit</Button>
+            )}
           </form>
         </DialogDescription>
 

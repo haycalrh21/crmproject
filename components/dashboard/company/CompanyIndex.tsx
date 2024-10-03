@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { createCompany, uploadImage } from "@/app/action/company";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
+import Spinner from "@/components/ui/Spinner";
 
 interface CompanyData {
   id: string;
@@ -38,6 +39,7 @@ const CompanyIndex = ({
   const [employeeId] = useState(session?.user?.id);
   const [companyData, setCompanyData] = useState<CompanyData | null>(data);
   const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -94,7 +96,7 @@ const CompanyIndex = ({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setLoading(true);
     if (!logoUrl) {
       console.error("No logo URL available");
       return;
@@ -108,7 +110,7 @@ const CompanyIndex = ({
         logo: logoUrl,
         employeeId: String(employeeId),
       });
-
+      setLoading(false);
       setCompanyData(newCompany);
       event.currentTarget.reset();
       setLogoUrl(null);
@@ -235,12 +237,13 @@ const CompanyIndex = ({
                     />
                   </div>
                 </div>
-                <Button
-                  type="submit"
-                  className="mt-4 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition"
-                >
-                  Save changes
-                </Button>
+                {loading ? (
+                  <Button type="submit">
+                    <Spinner className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-black" />
+                  </Button>
+                ) : (
+                  <Button type="submit">Submit</Button>
+                )}
               </form>
             </DialogContent>
           </Dialog>
