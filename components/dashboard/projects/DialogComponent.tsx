@@ -36,7 +36,7 @@ export const DialogComponent = ({
   setProjects: (projects: any) => void;
   resetForm: () => void;
   client: { id: string; name: string }[];
-  employee: { id: string; name: string; role: string }[]; // Ensure role is included
+  employee: { id: string; name: string; role: string; companyId: string }[];
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
@@ -45,33 +45,74 @@ export const DialogComponent = ({
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(
     null
   );
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("");
+  const [paymentDueDate, setPaymentDueDate] = useState<Date | undefined>(
+    new Date()
+  );
+
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  console.log(employee);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    if (!selectedClientId || !selectedEmployeeId || !selectedStatus) {
+
+    // Validasi input
+    if (
+      !selectedClientId ||
+      !selectedEmployeeId ||
+      !selectedStatus ||
+      !paymentAmount ||
+      !paymentStatus ||
+      !paymentDueDate
+    ) {
+      setLoading(false);
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
       });
       return;
     }
+
     try {
+      // Ambil employee yang dipilih untuk mendapatkan companyId
+      const selectedEmployee = employee.find(
+        (emp) => emp.id === selectedEmployeeId
+      );
+      const companyId = selectedEmployee ? selectedEmployee.companyId : null;
+
+      // Pastikan companyId ada
+      if (!companyId) {
+        setLoading(false);
+        toast({
+          title: "Error",
+          description: "Company ID not found.",
+        });
+        return;
+      }
+
+      // Panggil createProject dengan parameter yang sesuai
       const response = await createProject(
         name,
         description,
         selectedClientId,
         selectedEmployeeId,
+        companyId, // Kirim companyId ke createProject
         startDate ? new Date(startDate) : new Date(),
         endDate ? new Date(endDate) : new Date(),
-        selectedStatus as ProjectStatus
+        selectedStatus as ProjectStatus,
+        paymentAmount,
+        paymentStatus,
+        paymentDueDate
       );
 
+      // Menangani respons dari createProject
       if (response && response.id) {
         const newProject = {
           id: response.id,
@@ -83,17 +124,13 @@ export const DialogComponent = ({
           },
           employee: {
             id: selectedEmployeeId,
-            name:
-              employee.find((emp) => emp.id === selectedEmployeeId)?.name || "",
+            name: selectedEmployee ? selectedEmployee.name : "",
           },
           startDate: startDate ? new Date(startDate) : new Date(),
           endDate: endDate ? new Date(endDate) : null,
         };
-        setLoading(false);
-        toast({
-          title: "Success",
-          description: "Project created successfully",
-        });
+
+        // Update state projects
         setProjects((prevProjects: Project[]) => {
           const isDuplicate = prevProjects.some(
             (proj) => proj.id === newProject.id
@@ -107,24 +144,29 @@ export const DialogComponent = ({
           return prevProjects;
         });
 
+        toast({
+          title: "Success",
+          description: "Project created successfully",
+        });
+
         resetForm();
         setDialogOpen(false);
       } else {
-        setLoading(false);
         toast({
           title: "Error",
           description: "Failed to create project. Please try again.",
         });
       }
     } catch (error) {
-      setLoading(false);
-
       toast({
         title: "Error",
         description: "Failed to create project. Please try again.",
       });
+    } finally {
+      setLoading(false);
     }
   };
+
   const filteredEmployees = employee.filter(
     (emp) => emp.role === "PROJECT_MANAGER"
   );
@@ -272,6 +314,49 @@ export const DialogComponent = ({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="amount" className="text-right">
+                  Payment Amount
+                </Label>
+                <Input
+                  id="amount"
+                  name="amount"
+                  className="col-span-3"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="paymentStatus" className="text-right">
+                  Payment Status
+                </Label>
+                <Select onValueChange={(value) => setPaymentStatus(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Pilih Status Pembayaran" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="PAID">Paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="dueDate" className="text-right">
+                  Due Date
+                </Label>
+                <div className="col-span-3 max-h-[250px] overflow-auto">
+                  <Calendar
+                    mode="single"
+                    selected={paymentDueDate}
+                    onSelect={setPaymentDueDate}
+                    className="rounded-md border p-2 w-full"
+                  />
+                </div>
               </div>
             </div>
             <div className="flex justify-end pt-6">

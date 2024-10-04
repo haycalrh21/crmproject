@@ -3,50 +3,56 @@ import CardProject from "./CardProject";
 import { auth } from "@/app/auth";
 import { getCompany } from "@/app/action/company";
 import { getEmployee, loginEmployee } from "@/app/action/employee";
-import { ProjectStatus } from "@prisma/client"; // Pastikan import ProjectStatus benar
+import { ProjectStatus } from "@prisma/client";
 import { getClients } from "@/app/action/client";
 import { getProjects } from "@/app/action/project";
 
-export const revalidate = 300; // Revalidate every 60 seconds, or use cache 'no-store' for no cache
-
-interface Employee {
-  id: string;
-  companyId: string | null; // Pastikan companyId bisa null
-}
+export const revalidate = 300;
 
 const ProjectIndex = async () => {
   const session = await auth();
 
-  // Cari employee berdasarkan user yang sedang login
-  const userLogin = await loginEmployee(session?.user?.id as string);
-  const getData = await getCompany({
-    id: userLogin?.companyId as string,
-  });
+  if (!session?.user?.id) {
+    return <div>Session tidak valid.</div>;
+  }
 
-  const getEmployeeData = await getEmployee(getData?.id as string);
-  const getClientData = await getClients();
+  const userLogin = await loginEmployee(session.user.id);
 
-  // Ambil data proyek berdasarkan companyId dan pagination
-  const { projects, totalPages, currentPage } = await getProjects(
-    userLogin?.companyId as string,
-    1,
-    8
-  );
+  if (!userLogin?.companyId) {
+    return <div>User tidak terhubung dengan company.</div>;
+  }
+
+  const [getData, getEmployeeData, getClientData, projectData] =
+    await Promise.all([
+      getCompany({ id: userLogin.companyId }),
+      getEmployee(userLogin.companyId),
+      getClients(),
+      getProjects(userLogin.companyId, 1, 8),
+    ]);
+
+  if (!getData) {
+    return <div>Company tidak ditemukan.</div>;
+  }
+
+  const { projects, totalPages, currentPage } = projectData;
 
   // Map projects dan tentukan tipe untuk project
   const mappedProjects = projects.map((project) => ({
     ...project,
-    endDate: project.endDate ?? new Date(),
-    // Ensure that the status is never null, provide a default if it is
-    status: project.status ?? ProjectStatus.PENDING, // Replace PENDING with an appropriate default status
+    endDate: project.endDate ?? new Date(), // Set default endDate jika null
+    status: project.status ?? ProjectStatus.PENDING, // Set default status jika null
   }));
 
   // Map employee data to ensure role is always a string
-  const mappedEmployeeData = getEmployeeData.map((employee) => ({
-    id: employee.id,
-    name: employee.name,
-    role: employee.role || "No role assigned", // Default value if role is null
-  }));
+  const mappedEmployeeData = getEmployeeData
+    .map((employee) => ({
+      id: employee.id,
+      name: employee.name,
+      role: employee.role || "No role assigned",
+      // Pastikan companyId tidak null, gunakan nilai default atau filter
+      companyId: employee.companyId ?? "", // Ganti dengan string kosong jika null
+    }))
+    .filter((employee) => employee.companyId); // Hapus employee tanpa companyId
 
   return (
     <div className="p-4" suppressHydrationWarning={true}>
@@ -54,7 +60,7 @@ const ProjectIndex = async () => {
         session={session}
         client={getClientData}
         employee={mappedEmployeeData}
-        project={mappedProjects} // Kirim data proyek yang sudah dimodifikasi
+        project={mappedProjects} // pastikan project juga dikirim jika diperlukan
         totalPages={totalPages}
         currentPage={currentPage}
       />

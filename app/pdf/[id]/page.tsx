@@ -6,7 +6,7 @@ const PdfPage = async ({ params }: { params: { id: string } }) => {
   let data;
   try {
     data = await getPaymentId(params.id);
-    console.log("Fetched data:", data);
+    // console.log("Fetched data:", data);
   } catch (error) {
     console.error("Error fetching payment data:", error);
   }

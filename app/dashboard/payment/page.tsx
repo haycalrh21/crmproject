@@ -1,38 +1,36 @@
 import { loginEmployee } from "@/app/action/employee";
 import { getPayments } from "@/app/action/payment";
-import { getProjectPayment } from "@/app/action/project";
 import { auth } from "@/app/auth";
-
 import PaymentIndex from "@/components/dashboard/payment/PaymentIndex";
 import React from "react";
+
 export const revalidate = 300;
 
 const page = async () => {
   const session = await auth();
-
   const userLogin = await loginEmployee(session?.user?.id as string);
 
-  const getProjectPayments = await getProjectPayment();
+  // Pastikan companyId tidak null sebelum mengambil pembayaran
+  if (!userLogin?.companyId) {
+    return <div>Nothing in here</div>; // Jika tidak ada companyId
+  }
 
-  const getpaymentall = await getPayments();
+  // Ambil semua pembayaran berdasarkan companyId dari userLogin
+  const getProjectPayments = await getPayments(userLogin.companyId); // Ganti dengan userLogin.companyId
+  // console.log(getProjectPayments);
 
-  // Filter payments based on companyId from userLogin
-  const filteredPayments = getpaymentall.filter(
-    (payment) => payment.companyId === userLogin?.companyId
-  );
+  // Jika tidak ada pembayaran, tampilkan pesan
+  if (!getProjectPayments || getProjectPayments.length === 0) {
+    return <div>Tidak ada apa-apa</div>; // Jika tidak ada pembayaran
+  }
 
-  // Transformasi data agar `user` dipindahkan ke dalam `payment`
-  const transformedPayments = filteredPayments.map((payment) => ({
-    id: payment.id, // Pastikan ID pembayaran ditambahkan
-    amount: payment.amount.toString(), // Konversi amount ke string
-    status: payment.status, // Pastikan status juga ditambahkan
-    project: {
-      id: payment.project.id, // ID project
-      name: payment.project.name, // Nama project
-      user: {
-        id: payment.project.user.id, // ID user dari project
-        name: payment.project.user.name, // Nama user dari project
-      },
+  // Ambil projectId dari pembayaran dan buat array proyek
+  const projects = getProjectPayments.map((payment) => ({
+    id: payment.project.id,
+    name: payment.project.name,
+    user: {
+      id: payment.project.user.id,
+      name: payment.project.user.name,
     },
   }));
 
@@ -40,8 +38,8 @@ const page = async () => {
     <div>
       <PaymentIndex
         session={userLogin}
-        project={getProjectPayments}
-        payment={transformedPayments}
+        project={projects} // Lempar project dengan struktur yang sesuai
+        payment={getProjectPayments} // Lempar payment juga
       />
     </div>
   );

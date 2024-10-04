@@ -125,8 +125,11 @@ export const createPayment = async (
   return payment;
 };
 
-export const getPayments = async () => {
+export const getPayments = async (companyId?: string) => {
   const payments = await prisma.payment.findMany({
+    where: {
+      companyId,
+    },
     include: {
       project: {
         include: {
@@ -135,7 +138,9 @@ export const getPayments = async () => {
       },
     },
   });
-  return payments;
+
+  // Filter pembayaran untuk hanya yang memiliki companyId
+  return payments.filter((payment) => payment.companyId !== null);
 };
 
 export const getPaymentId = async (id: string) => {

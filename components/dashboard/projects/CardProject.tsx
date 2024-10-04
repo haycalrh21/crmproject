@@ -28,7 +28,7 @@ const CardProject = ({
 }: {
   session: any;
   project: Project[];
-  employee: { id: string; name: string; role: string }[];
+  employee: { id: string; name: string; role: string; companyId: string }[];
   client: { id: string; name: string }[];
   totalPages: number;
   currentPage: number;

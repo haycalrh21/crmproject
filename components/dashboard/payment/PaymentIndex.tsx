@@ -1,12 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { createPayment, getPayments } from "@/app/action/payment"; // ambil getPayments buat refresh data
+import { createPayment, getPayments } from "@/app/action/payment";
 import PaymentForm from "./PaymentForm";
 import PaymentTable from "./PaymentTable";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { set } from "date-fns";
 
 const PaymentIndex = ({
   session,
@@ -37,13 +36,13 @@ const PaymentIndex = ({
   }[];
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [payments, setPayments] = useState(payment); // State baru buat payment
+  const [payments, setPayments] = useState(payment);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null
   );
   const [amount, setAmount] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [dueDate, setDueDate] = useState<Date | undefined>(new Date()); // State for dueDate
+  const [dueDate, setDueDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -54,20 +53,22 @@ const PaymentIndex = ({
     const filteredPayments = updatedPayments.filter(
       (payment) => payment.companyId === companyId
     );
-    setPayments(filteredPayments); // Update state payments
+    setPayments(filteredPayments);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     setLoading(true);
+
     if (session?.role !== "OWNER") {
       toast({
         title: "Error",
         description: "You are not authorized to create payment",
       });
+      setLoading(false);
       return;
     }
+
     await createPayment(
       selectedProjectId ?? "",
       amount,
@@ -81,14 +82,14 @@ const PaymentIndex = ({
       title: "Success",
       description: "Payment created successfully",
     });
-    // Reset form
+
+    // Reset form fields
     setSelectedProjectId(null);
     setAmount("");
     setSelectedStatus(null);
     setDueDate(new Date());
     setDialogOpen(false);
 
-    // Update data payment setelah submit
     await fetchUpdatedPayments();
   };
 
@@ -96,14 +97,6 @@ const PaymentIndex = ({
     <div>
       <div suppressHydrationWarning>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          {(session?.role === "OWNER" ||
-            session?.role === "PROJECT_MANAGER") && (
-            <DialogTrigger>
-              <Button variant="outline" className="mt-4">
-                Tambah Payment
-              </Button>
-            </DialogTrigger>
-          )}
           <PaymentForm
             project={project}
             loading={loading}
@@ -111,7 +104,7 @@ const PaymentIndex = ({
             setSelectedProjectId={setSelectedProjectId}
             setAmount={setAmount}
             setSelectedStatus={setSelectedStatus}
-            setDueDate={setDueDate} // Pass state setter for dueDate
+            setDueDate={setDueDate}
           />
         </Dialog>
       </div>

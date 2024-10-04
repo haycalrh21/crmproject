@@ -4,6 +4,7 @@ import { sendEmail } from "../lib/nodemailer";
 import { Role } from "@prisma/client";
 import prisma from "../lib/prismaClient";
 import bcrypt from "bcryptjs";
+import { Task } from "../types/tasks";
 
 export const createEmployee = async (
   name: string,
@@ -110,4 +111,46 @@ export const loginEmployee = async (id: string) => {
     },
   });
   return employee;
+};
+
+export const fetchTasksForUser = async (userId: string): Promise<Task[]> => {
+  const userLogin = await prisma.employee.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      tasks: {
+        include: {
+          employee: true,
+          project: true,
+        },
+      },
+    },
+  });
+
+  if (!userLogin || !userLogin.companyId) {
+    console.error("User not found or not associated with any company");
+    return [];
+  }
+
+  const { role } = userLogin;
+  let tasks: Task[] = [];
+
+  if (role === "OWNER" || role === "PROJECT_MANAGER") {
+    tasks = await prisma.task.findMany({
+      where: {
+        employee: {
+          companyId: userLogin.companyId,
+        },
+      },
+      include: {
+        employee: true,
+        project: true,
+      },
+    });
+  } else if (role === "EMPLOYEE") {
+    tasks = userLogin.tasks as Task[];
+  }
+
+  return tasks;
 };

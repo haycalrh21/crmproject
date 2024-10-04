@@ -3,16 +3,20 @@
 import prisma from "../lib/prismaClient";
 import { sendEmail } from "../lib/nodemailer";
 import { Employee } from "../types/employee";
-import { ProjectStatus } from "@prisma/client";
+import { ProjectStatus, User } from "@prisma/client";
 
 export const createProject = async (
   name: string,
   description: string,
   userId: string,
   employeeId: string,
+  companyId: string, // Pastikan companyId ditambahkan di parameter
   startDate: Date,
   endDate: Date | null,
-  status: ProjectStatus
+  status: ProjectStatus,
+  paymentAmount: string,
+  paymentStatus: string,
+  paymentDueDate: Date
 ) => {
   const employee: Employee | null = await prisma.employee.findUnique({
     where: { id: employeeId },
@@ -27,12 +31,19 @@ export const createProject = async (
       startDate,
       endDate,
       status,
+      payments: {
+        create: {
+          amount: paymentAmount,
+          status: paymentStatus,
+          dueDate: paymentDueDate,
+          companyId, // Tambahkan companyId di sini
+        },
+      },
     },
   });
-
   if (project && employee) {
-    const subject = "Proyek Baru Diciptakan";
-    const text = `
+    const subjectEmployee = "Proyek Baru Diciptakan";
+    const textEmployee = `
       Hai ${employee.name},
 
       Kami ingin memberi tahu Anda bahwa proyek baru telah diciptakan:
@@ -41,15 +52,51 @@ export const createProject = async (
       Deskripsi: ${project.description}
       Tanggal Mulai: ${startDate.toDateString()}
       Tanggal Selesai: ${endDate ? endDate.toDateString() : "Belum ditentukan"}
+      Jumlah Pembayaran: ${paymentAmount}
+      Status Pembayaran: ${paymentStatus}
+      Tanggal Jatuh Tempo: ${paymentDueDate.toDateString()}
 
       Terima kasih,
       Tim Kami
     `;
 
     try {
-      await sendEmail(employee.email, subject, text);
+      await sendEmail(employee.email, subjectEmployee, textEmployee);
     } catch (error) {
-      console.error("Error sending email:", error);
+      console.error("Error sending email to employee:", error);
+    }
+
+    // Kirim email ke pengguna
+    const user: User | null = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (user) {
+      const subjectUser = "Proyek Baru Diciptakan untuk Anda";
+      const textUser = `
+        Hai ${user.name},
+
+        Proyek baru telah diciptakan untuk Anda:
+
+        Nama Proyek: ${project.name}
+        Deskripsi: ${project.description}
+        Tanggal Mulai: ${startDate.toDateString()}
+        Tanggal Selesai: ${
+          endDate ? endDate.toDateString() : "Belum ditentukan"
+        }
+        Jumlah Pembayaran: ${paymentAmount}
+        Status Pembayaran: ${paymentStatus}
+        Tanggal Jatuh Tempo: ${paymentDueDate.toDateString()}
+
+        Terima kasih,
+        Tim Kami
+      `;
+
+      try {
+        await sendEmail(user.email, subjectUser, textUser);
+      } catch (error) {
+        console.error("Error sending email to user:", error);
+      }
     }
   }
 
@@ -76,14 +123,14 @@ export const getProjects = async (
       user: true,
       employee: true,
     },
-    skip: (page - 1) * pageSize, // Menghitung berapa banyak item yang harus dilewati
+    skip: (page - 1) * pageSize,
     take: pageSize,
   });
 
   const totalProjects = await prisma.project.count({
     where: {
       employee: {
-        companyId: companyId, // Pastikan total proyek dihitung berdasarkan companyId
+        companyId: companyId,
       },
     },
   });
